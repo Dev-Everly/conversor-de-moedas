@@ -17,32 +17,32 @@ public class ConversorService {
 
     public Double converter(Moeda moeda) throws URISyntaxException {
         try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Qual moeda deseja converter (ex: BRL,USD)");
-            String moedaOrigem = scanner.nextLine();
 
 
-            URI endereco = new URI("https://v6.exchangerate-api.com/v6/ee1772f4b3c6608c4cb16992/latest/" + moedaOrigem);
+
+            URI endereco = URI.create("https://v6.exchangerate-api.com/v6/ee1772f4b3c6608c4cb16992/latest/" + moeda.origem());
 
 
             HttpClient client = HttpClient.newHttpClient();
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(endereco)
+                    .GET()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            Gson gson = new Gson();
+
+
 
             JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
             JsonObject rates = jsonObject.getAsJsonObject("conversion_rates");
 
             if(rates != null && rates.has(moeda.destino())) {
-                double taxa = rates.getAsDouble();
+                double taxa = rates.get(moeda.destino()).getAsDouble();
                 return moeda.valor() * taxa;
             }else {
-                System.out.println("Moeda de destino não encontrada");
+                System.out.println("Moeda  não encontrada");
                 return null;
             }
 
